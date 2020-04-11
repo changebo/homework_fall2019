@@ -3,7 +3,7 @@ import numpy as np
 class BasePolicy(object):
 
     def __init__(self, **kwargs):
-       super(BasePolicy, self).__init__(**kwargs)
+        super(BasePolicy, self).__init__(**kwargs)
 
     def build_graph(self):
         raise NotImplementedError

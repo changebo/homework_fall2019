@@ -72,7 +72,7 @@ class RL_Trainer(object):
 
         ## TODO initialize all of the TF variables (that were created by agent, etc.)
         ## HINT: use global_variables_initializer
-        TODO
+        tf.compat.v1.global_variables_initializer()
 
     def run_training_loop(self, n_iter, collect_policy, eval_policy,
                         initial_expertdata=None, relabel_with_expert=False,
@@ -156,12 +156,19 @@ class RL_Trainer(object):
                 # ``` return loaded_paths, 0, None ```
 
                 # collect data, batch_size is the number of transitions you want to collect.
+        if itr == 0:
+            with open(load_initial_expertdata, 'rb') as f:
+                loaded_paths = pickle.loads(f.read())
+            return loaded_paths, 0, None
 
         # TODO collect data to be used for training
         # HINT1: use sample_trajectories from utils
         # HINT2: you want each of these collected rollouts to be of length self.params['ep_len']
         print("\nCollecting data to be used for training...")
-        paths, envsteps_this_batch = TODO
+        paths, envsteps_this_batch = sample_trajectories(env=self.env,
+                                                         policy=collect_policy,
+                                                         min_timesteps_per_batch=self.params['ep_len'],
+                                                         max_path_length=batch_size)
 
         # collect more rollouts with the same policy, to be saved as videos in tensorboard
         # note: here, we collect MAX_NVIDEO rollouts, each of length MAX_VIDEO_LEN
