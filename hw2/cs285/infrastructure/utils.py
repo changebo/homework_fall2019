@@ -1,6 +1,5 @@
 import numpy as np
 import time
-import scipy
 
 ############################################
 ############################################
@@ -19,7 +18,10 @@ def sample_trajectory(env, policy, max_path_length, render=False, render_mode=('
         if render:
             if 'rgb_array' in render_mode:
                 if hasattr(env, 'sim'):
-                    image_obs.append(env.sim.render(camera_name='track', height=500, width=500)[::-1])
+                    if 'track' in env.env.model.camera_names:
+                        image_obs.append(env.sim.render(camera_name='track', height=500, width=500)[::-1])
+                    else:
+                        image_obs.append(env.sim.render(height=500, width=500)[::-1])
                 else:
                     image_obs.append(env.render(mode=render_mode))
             if 'human' in render_mode:
@@ -40,8 +42,8 @@ def sample_trajectory(env, policy, max_path_length, render=False, render_mode=('
         next_obs.append(ob)
         rewards.append(rew)
 
-        # TODO end the rollout if the rollout ended 
-        # HINT: rollout can end due to done, or due to max_path_length
+        # End the rollout if the rollout ended 
+        # Note that the rollout can end due to done, or due to max_path_length
         rollout_done = int(done or steps == max_path_length) # HINT: this is either 0 or 1
         terminals.append(rollout_done)
         
@@ -96,7 +98,7 @@ def Path(obs, image_obs, acs, rewards, next_obs, terminals):
             "terminal": np.array(terminals, dtype=np.float32)}
 
 
-def convert_listofrollouts(paths, concat_rew=True):
+def convert_listofrollouts(paths):
     """
         Take a list of rollout dictionaries
         and return separate arrays,
@@ -104,13 +106,11 @@ def convert_listofrollouts(paths, concat_rew=True):
     """
     observations = np.concatenate([path["observation"] for path in paths])
     actions = np.concatenate([path["action"] for path in paths])
-    if concat_rew:
-        rewards = np.concatenate([path["reward"] for path in paths])
-    else:
-        rewards = [path["reward"] for path in paths]
     next_observations = np.concatenate([path["next_observation"] for path in paths])
     terminals = np.concatenate([path["terminal"] for path in paths])
-    return observations, actions, rewards, next_observations, terminals
+    concatenated_rewards = np.concatenate([path["reward"] for path in paths])
+    unconcatenated_rewards = [path["reward"] for path in paths]
+    return observations, actions, next_observations, terminals, concatenated_rewards, unconcatenated_rewards
 
 ############################################
 ############################################
