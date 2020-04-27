@@ -167,8 +167,8 @@ class RL_Trainer(object):
         print("\nCollecting data to be used for training...")
         paths, envsteps_this_batch = sample_trajectories(env=self.env,
                                                          policy=collect_policy,
-                                                         min_timesteps_per_batch=self.params['ep_len'],
-                                                         max_path_length=batch_size)
+                                                         min_timesteps_per_batch=batch_size,
+                                                         max_path_length=self.params['ep_len'])
 
         # collect more rollouts with the same policy, to be saved as videos in tensorboard
         # note: here, we collect MAX_NVIDEO rollouts, each of length MAX_VIDEO_LEN
